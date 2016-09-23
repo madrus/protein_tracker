@@ -1,0 +1,12 @@
+{
+  "name": "ProteinTracker",
+  "private": true,
+  "scripts": {
+    "start": "meteor run"
+  },
+  "dependencies": {
+    "fibers": "^1.0.14",
+    "jslint": "^0.10.3",
+    "meteor-node-stubs": "~0.2.0"
+  }
+}

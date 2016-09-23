@@ -1,0 +1,32 @@
+<head>
+  <title>ProteinTracker</title>
+</head>
+
+<body>
+  <h1>Protein Tracker</h1>
+  {{> loginButtons}}
+  {{#if currentUser}}
+    {{> userDetails}}
+    {{> history}}
+  {{/if}}
+</body>
+
+<template name="userDetails">
+  {{ #with user }}
+  <h2>Total: <span>{{ total }}</span></h2>
+  <h2>Goal: <span>{{ goal }}</span></h2>
+  <h3>Enter amount:</h3>
+  {{ /with }}
+    <input type="text" id="amount" value="{{ lastAmount }}">
+  {{ #with user }}
+  <input type="submit" id="addAmount" value="Add Protein" />
+  <input type="submit" id="quickSubtract" value="-100" />
+  {{ /with }}
+</template>
+
+<template name="history">
+  <h2>Last 5 Entries</h2>
+  {{ #each historyItem }}
+  <p>{{ date }} - {{ value }}</p>
+  {{ /each }}
+</template>
