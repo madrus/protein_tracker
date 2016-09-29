@@ -92,7 +92,7 @@ It is still possible though to install community packages on Windows.
 * create `packages` folder in the root of your Meteor project if it does not exist yet
 * find the GitHub repository for your Meteor package, e.g. `Meteor Router`
 * clone the package into the `packages` folder
-* if mecessary, rename the package directory name to the correct name
+* if necessary, rename the package directory name to the correct name
 * `meteor add [package_name]` 
 
 
