@@ -25,3 +25,4 @@ underscore
 accounts-ui
 accounts-google
 session
+iron:router

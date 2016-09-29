@@ -5,10 +5,16 @@ History = new Meteor.Collection('historyData');
 
 ProteinData.allow({
   insert: function (userId, data) {
-    return true; // always allow
+    if (data.userId === userId) {
+      return true; // allow
+    }
+    return false;
   },
   update: function (userId, data) {
-    return true; // always allow
+    if (data.userId === userId) {
+      return true; // allow
+    }
+    return false;
   }
 });
 
@@ -45,6 +51,17 @@ Meteor.methods({
 });
 
 if (Meteor.isClient) {
+  Router.configure({
+    layoutTemplate: 'main'
+  });
+
+  Router.route('/', {
+    name: 'home',
+    template: 'home'
+  });
+
+  Router.route('/settings');
+
   Meteor.subscribe('allProteinData');
   Meteor.subscribe('allHistory');
 
