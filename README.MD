@@ -95,6 +95,39 @@ It is still possible though to install community packages on Windows.
 * if necessary, rename the package directory name to the correct name
 * `meteor add [package_name]` 
 
+## Meteor with Git-Bash
+
+I noticed that `meteor` command was not available in `git-bash`. Searching the Internet
+brought me this solution.
+
+* Make sure meteor works in the default windows command prompt.
+* Open git bash in any directory and check if the following command works:
+
+  `cmd //c meteor`
+
+  This shoud run the command meteor as if you were in the command prompt.
+* Set up an alias in git bash so you don't have to type that out each time. Open git bash
+  and enter the following:
+
+  `vim ~/.bashrc`
+
+  This will open/create the `.bashrc` file in VIM, press `"i"` to insert and type the following:
+
+  `alias meteor="cmd //c meteor"`
+
+  Save the file and exit `vim`.
+* Back in git bash, point to your `.bashrc` file by entering the following:
+
+  `source ~/.bashrc`
+
+  Now you should be able to run meteor commands straight from git bash!
+* The next time I run git-bash, I see this warning: 
+
+  > WARNING: Found ~/.bashrc but no ~/.bash_profile, ~/.bash_login or ~/.profile.  
+  > This looks like an incorrect setup.  
+  > A ~/.bash_profile that loads ~/.bashrc will be created for you.
+
+  After that, when I start git-bash, it starts normally and meteor is working.
 
 ## Observations
 
