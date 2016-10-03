@@ -1,3 +1,10 @@
+<template name="main">
+    <h1>Protein Tracker</h1>
+    {{> yield}}
+    <hr />
+    <p>Copyright &copy; ProteinTracker, 2015</p>
+</template>
+
 <template name="home">
   {{> loginButtons}}
   {{#if currentUser}}
@@ -7,23 +14,16 @@
   {{/if}}
 </template>
 
-<template name="main">
-    <h1>Protein Tracker</h1>
-    {{> yield}}
-    <hr />
-    <p>Copyright &copy; ProteinTracker, 2015</p>
-</template>
-
 <template name="userDetails">
   {{ #with user }}
-  <h2>Total: <span>{{ total }}</span></h2>
-  <h2>Goal: <span>{{ goal }}</span></h2>
-  <h3>Enter amount:</h3>
+    <h2>Total: <span>{{ total }}</span></h2>
+    <h2>Goal: <span>{{ goal }}</span></h2>
+    <h3>Enter amount:</h3>
   {{ /with }}
-    <input type="text" id="amount" value="{{ lastAmount }}">
+  <input type="text" id="amount" value="{{ lastAmount }}">
   {{ #with user }}
-  <input type="submit" id="addAmount" value="Add Protein" />
-  <input type="submit" id="quickSubtract" value="-100" />
+    <input type="submit" id="addAmount" value="Add Protein" />
+    <input type="submit" id="quickSubtract" value="-100" />
   {{ /with }}
 </template>
 

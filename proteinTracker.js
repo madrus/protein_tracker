@@ -28,25 +28,33 @@ ProteinData.deny({
 
 Meteor.methods({
   addProtein: function (amount) {
-    console.log(`addProtein: userId = ${this.userId}`);
-
-    if (!this.isSimulation) {
-      var Future = Npm.require('fibers/future');
-      var future = new Future();
-      Meteor.setTimeout(function () {
-        future.return();
-      }, 3 * 1000);
-      future.wait();
-    } else {
-      amount = 500;
-    }
-
-    ProteinData.update({ userId: this.userId }, { $inc: { total: amount } });
+    var userId = Meteor.userId();
+    // console.log(`addProtein: userId = ${userId}`);
+    // if (!this.isSimulation) {
+    //   var Future = Npm.require('fibers/future');
+    //   var future = new Future();
+    //   Meteor.setTimeout(function () {
+    //     future.return();
+    //   }, 3 * 1000);
+    //   future.wait();
+    // } else {
+    //   amount = 500;
+    // }
+    ProteinData.update({ _id: userId }, { $inc: { total: amount } });
     History.insert({
+      userId: this.userId,
       value: amount,
-      date: new Date().toTimeString(),
-      userId: this.userId
+      date: new Date().toTimeString()
     });
+  },
+  initializeData: function (userId) {
+    var data = {
+      _id: userId,
+      total: 0,
+      goal: 200
+    };
+
+    ProteinData.insert(data);
   }
 });
 
@@ -66,6 +74,7 @@ if (Meteor.isClient) {
   Meteor.subscribe('allHistory');
 
   Deps.autorun(function () {
+    var userId = Meteor.userId();
     if (Meteor.user()) {
       console.log(`User logged in: ${Meteor.user().profile.name}`);
     } else {
@@ -76,17 +85,13 @@ if (Meteor.isClient) {
   Template.userDetails.helpers({
     user: function () {
       var userId = Meteor.userId();
-      console.log(`userId = ${userId}`);
-
-      var data = ProteinData.findOne({ userId: userId });
+      var data = ProteinData.findOne({ _id: userId });
+      // print_data(data);
       if (!data) {
-        console.log(`no data found`);
-        data = {
-          userId: userId,
-          total: 0,
-          goal: 200
-        };
-        ProteinData.insert(data);
+        Meteor.call('initializeData', userId, function (err, id) {
+          if (err)
+            return alert(err.reason);
+        });
       }
       return data;
     },
@@ -97,16 +102,19 @@ if (Meteor.isClient) {
 
   Template.history.helpers({
     historyItem: function () {
-      return History.find({}, { sort: { date: -1 } });
+      var userId = Meteor.userId();
+      var historyData = History.find({ userId: userId }, { sort: { date: -1 } });
+      return historyData;
     }
   });
 
+  // in Template we have access to this._id  
   Template.userDetails.events({
     'click #addAmount': function (e) {
       e.preventDefault();
 
       var amount = parseInt($('#amount').val());
-      Meteor.call('addProtein', amount, function (err, id) {
+      Meteor.call('addProtein', amount, function (err) {
         if (err)
           return alert(err.reason);
       });
@@ -114,8 +122,13 @@ if (Meteor.isClient) {
     },
     'click #quickSubtract': function (e) {
       e.preventDefault();
-      console.log(`quickSubtract: userId = ${this.userId}`);
-      ProteinData.update(this.userId, { $inc: { total: -100 } });
+
+      var amount = -100;
+      Meteor.call('addProtein', amount, function (err) {
+        if (err)
+          return alert(err.reason);
+      });
+      Session.set('lastAmount', amount);
     }
   });
 }
@@ -124,16 +137,26 @@ if (Meteor.isClient) {
 
 if (Meteor.isServer) {
   Meteor.publish('allProteinData', function () {
-    console.log(`allProteinData: userId = ${this.userId}`);
-    return ProteinData.find({ userId: this.userId });
+    return ProteinData.find({ _id: this.userId });
   });
 
   Meteor.publish('allHistory', function () {
-    console.log(`allHistory: userId = ${this.userId}`);
     return History.find({ userId: this.userId }, { sort: { date: -1 }, limit: 5 });
   });
 
   Meteor.startup(() => {
     // code to run on server at startup
   });
+}
+
+//////////////////////////////////
+
+function print_data(data) {
+  if (data) {
+    _.map(_.keys(data), function (key) {
+      console.log(`key: ${key}, value: ${data[key]}`);
+    });
+  } else {
+    console.log('data is empty');
+  }
 }

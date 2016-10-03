@@ -171,4 +171,73 @@ brought me this solution.
     document.title = 'my awesome site: ' + Router.current().route.getName();
   }
   ```
-  
+
+## Endless cycle
+
+In the `userTemplate` template in `proteinTracker.html`, I had this code:
+
+```html
+<template name="userDetails">
+  {{ #with user }}
+  ...
+  {{ /with }}
+</template>
+```
+
+and in the `proteinTracker.js` this piece of code inside the 
+
+```Javascript
+Template.userDetails.helpers({
+  user: function () {
+
+    if (!data) {
+      var data = {
+        _id: userId,
+        total: 0,
+        goal: 200
+      };
+
+      ProteinData.insert(data);
+    }
+
+    return data;
+  },
+  ...
+});
+```
+
+When running the application, inserting the data in the helper resulted in an endless loop on `user`
+function. It also violated the `SOLID:SRP` principle. The fix was to create a new Metheor method 
+
+```Javascript
+Meteor.methods({
+  initializeData: function (userId) {
+    var data = {
+      _id: userId,
+      total: 0,
+      goal: 200
+    };
+
+    ProteinData.insert(data);
+  }
+});
+```
+
+and then to call it inside the `userDetails` template helper:
+
+```Javascript
+Template.userDetails.helpers({
+  user: function () {
+    ...
+    if (!data) {
+      Meteor.call('initializeData', userId, function (err, id) {
+        if (err)
+          return alert(err.reason);
+      });
+    }
+
+    return data;
+  },
+  ...
+});
+```
