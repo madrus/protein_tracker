@@ -95,6 +95,39 @@ It is still possible though to install community packages on Windows.
 * if necessary, rename the package directory name to the correct name
 * `meteor add [package_name]` 
 
+## Meteor with Git-Bash
+
+I noticed that `meteor` command was not available in `git-bash`. Searching the Internet
+brought me this solution.
+
+* Make sure meteor works in the default windows command prompt.
+* Open git bash in any directory and check if the following command works:
+
+  `cmd //c meteor`
+
+  This shoud run the command meteor as if you were in the command prompt.
+* Set up an alias in git bash so you don't have to type that out each time. Open git bash
+  and enter the following:
+
+  `vim ~/.bashrc`
+
+  This will open/create the `.bashrc` file in VIM, press `"i"` to insert and type the following:
+
+  `alias meteor="cmd //c meteor"`
+
+  Save the file and exit `vim`.
+* Back in git bash, point to your `.bashrc` file by entering the following:
+
+  `source ~/.bashrc`
+
+  Now you should be able to run meteor commands straight from git bash!
+* The next time I run git-bash, I see this warning: 
+
+  > WARNING: Found ~/.bashrc but no ~/.bash_profile, ~/.bash_login or ~/.profile.  
+  > This looks like an incorrect setup.  
+  > A ~/.bash_profile that loads ~/.bashrc will be created for you.
+
+  After that, when I start git-bash, it starts normally and meteor is working.
 
 ## Observations
 
@@ -138,4 +171,73 @@ It is still possible though to install community packages on Windows.
     document.title = 'my awesome site: ' + Router.current().route.getName();
   }
   ```
-  
+
+## Endless cycle
+
+In the `userTemplate` template in `proteinTracker.html`, I had this code:
+
+```html
+<template name="userDetails">
+  {{ #with user }}
+  ...
+  {{ /with }}
+</template>
+```
+
+and in the `proteinTracker.js` this piece of code inside the 
+
+```Javascript
+Template.userDetails.helpers({
+  user: function () {
+
+    if (!data) {
+      var data = {
+        _id: userId,
+        total: 0,
+        goal: 200
+      };
+
+      ProteinData.insert(data);
+    }
+
+    return data;
+  },
+  ...
+});
+```
+
+When running the application, inserting the data in the helper resulted in an endless loop on `user`
+function. It also violated the `SOLID:SRP` principle. The fix was to create a new Metheor method 
+
+```Javascript
+Meteor.methods({
+  initializeData: function (userId) {
+    var data = {
+      _id: userId,
+      total: 0,
+      goal: 200
+    };
+
+    ProteinData.insert(data);
+  }
+});
+```
+
+and then to call it inside the `userDetails` template helper:
+
+```Javascript
+Template.userDetails.helpers({
+  user: function () {
+    ...
+    if (!data) {
+      Meteor.call('initializeData', userId, function (err, id) {
+        if (err)
+          return alert(err.reason);
+      });
+    }
+
+    return data;
+  },
+  ...
+});
+```
