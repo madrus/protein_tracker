@@ -98,7 +98,7 @@ It is still possible though to install community packages on Windows.
 ## Meteor with Git-Bash
 
 I noticed that `meteor` command was not available in `git-bash`. Searching the Internet
-brought me this solution.
+brought me to this solution.
 
 * Make sure meteor works in the default windows command prompt.
 * Open git bash in any directory and check if the following command works:
